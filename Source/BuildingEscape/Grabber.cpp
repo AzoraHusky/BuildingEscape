@@ -48,9 +48,7 @@ void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber pressed!"));
 
-	// TODO only raycast when key is pressed and see if we reach
-
-	// Try and reach any actors with phyics body collision channel set
+	GetFirstPhysicsBodyInReach();
 
 	// If we hit something then attach PhysicsHandle
 	// TODO attach PhysicsHandle
@@ -69,9 +67,6 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	// If PhysicsHandle attached
 	// Move Object we are holding
-
-	GetFirstPhysicsBodyInReach();
-	
 }
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
@@ -104,7 +99,7 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s actor is hit!"), *ActorHit->GetName());
 	}
-	
+
 	return Hit;
 }
 

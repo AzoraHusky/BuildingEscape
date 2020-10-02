@@ -1,11 +1,10 @@
 // Copyright Duncan Keenan-Smith 2020
 
 
-#include "Engine/World.h"
-#include "Engine/EngineTypes.h"
-#include "DrawDebugHelpers.h"
-#include "GameFramework/PlayerController.h"
 #include "Grabber.h"
+#include "DrawDebugHelpers.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values for this component's properties
 UGrabber::UGrabber()
@@ -47,17 +46,35 @@ void UGrabber::FindPhysicsHandle()
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber pressed!"));
+	
+	// Get player's viewpoint
+	FVector PlayerViewLocation;
+	FRotator PlayerViewRotation;
 
-	GetFirstPhysicsBodyInReach();
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViewLocation, OUT PlayerViewRotation);
+	
+	FVector LineTraceEnd = PlayerViewLocation + PlayerViewRotation.Vector() * Reach;
+
+	FHitResult Hit = GetFirstPhysicsBodyInReach();
+	UPrimitiveComponent* ComponentToGrab = Hit.GetComponent();
 
 	// If we hit something then attach PhysicsHandle
-	// TODO attach PhysicsHandle
+	if (Hit.GetActor())
+	{
+		PhysicsHandle->GrabComponentAtLocation
+			(
+				ComponentToGrab,
+				NAME_None,
+				LineTraceEnd
+			);
+	}
 }
 
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber released!"));
-	// TODO remove PhysicsHandle
+	PhysicsHandle->ReleaseComponent();
 }
 
 // Called every frame
@@ -65,8 +82,21 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// Get player's viewpoint
+	FVector PlayerViewLocation;
+	FRotator PlayerViewRotation;
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViewLocation, OUT PlayerViewRotation);
+	
+	FVector LineTraceEnd = PlayerViewLocation + PlayerViewRotation.Vector() * Reach;
+
 	// If PhysicsHandle attached
-	// Move Object we are holding
+	if (PhysicsHandle->GrabbedComponent)
+	{
+		// Move Object we are holding
+		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+	}
 }
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach() const

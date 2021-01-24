@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/AudioComponent.h"
 #include "Components/ActorComponent.h"
 #include "Engine/TriggerVolume.h"
 #include "OpenDoor.generated.h"
@@ -26,10 +27,20 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void OpenDoor(float DeltaTime);
 	void CloseDoor(float DeltaTime);
+	float TotalMassOfActors() const;
+	void FindAudioComponent();
+	void FindPressurePlate() const;
+
+	// Tracks whether sound has been played
+	bool HasOpenSoundPlayed = false;
+	bool HasCloseSoundPlayed = true;
 
 private:
 	float CurrentYaw;
 	float OriginalYaw;
+
+	UPROPERTY(EditAnywhere)
+	float TotalMassToOpenDoor = 60.f;
 
 	UPROPERTY(EditAnywhere)
 	float DoorOpenAngle = 90.f;
@@ -46,9 +57,8 @@ private:
 	float OpenDoorSpeed = 15.f;
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
+	ATriggerVolume* PressurePlate = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	AActor* ActorThatOpens;
-
+	UPROPERTY()
+	UAudioComponent* AudioComponent = nullptr;
 };
